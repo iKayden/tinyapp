@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/iKayden/tinyapp/issues"
   },
-  "homepage": "https://github.com/iKayden/tinyapp#readme"
+  "homepage": "https://github.com/iKayden/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
 }
