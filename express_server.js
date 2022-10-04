@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const morgan = require("morgan");
+const PORT = 8080 || 3000; // default port 8080
 
 // function for making random strings. You can choose the length of it as a param (len)
 function generateRandomString() {
@@ -17,6 +18,7 @@ function generateRandomString() {
 // settings for the Express server
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
 
 //our mock-data-base
 const urlDatabase = {
@@ -68,6 +70,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
+
 // -------- Server Initiation ------------------ //
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
