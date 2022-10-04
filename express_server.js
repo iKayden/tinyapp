@@ -2,6 +2,19 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+// function for making random strings. You can choose the length of it as a param (len)
+function generateRandomString(len) {
+  const randChar =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let output = "";
+  const urlLength = randChar.length;
+  for (let i = 0; i < len; i++) {
+    output += randChar.charAt(Math.floor(Math.random() * urlLength));
+  }
+  console.log(output);
+  return output;
+}
+
 // settings for the Express server
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -14,6 +27,7 @@ const urlDatabase = {
 
 // Routes for the server
 
+// app.get routes
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -41,6 +55,12 @@ app.get("/hello", (req, res) => {
 
 app.get("/", (req, res) => {
   res.send("Hello!");
+});
+
+// app.post routes
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
 });
 
 // -------- Server Initiation ------------------
