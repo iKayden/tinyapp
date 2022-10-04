@@ -3,15 +3,14 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 // function for making random strings. You can choose the length of it as a param (len)
-function generateRandomString(len) {
+function generateRandomString() {
   const randChar =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let output = "";
   const urlLength = randChar.length;
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < 6; i++) {
     output += randChar.charAt(Math.floor(Math.random() * urlLength));
   }
-  console.log(output);
   return output;
 }
 
@@ -28,11 +27,9 @@ const urlDatabase = {
 // Routes for the server
 
 // app.get routes
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
-});
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+
+app.get("/", (req, res) => {
+  res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
@@ -40,30 +37,38 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("/urls/:id", (req, res) => {
-  const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
-  };
-  console.log(templateVars);
-  res.render("urls_show", templateVars);
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+app.get("urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  const templateVars = { shortURL, longURL };
+  res.render("url_show", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
 });
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World!</b></body></html>\n");
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 // app.post routes
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
+  const shortURL = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
-
-// -------- Server Initiation ------------------
+// -------- Server Initiation ------------------ //
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
