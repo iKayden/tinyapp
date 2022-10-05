@@ -38,7 +38,6 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
-
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -58,12 +57,6 @@ const users = {
 app.post("/register", (req, res) => {
   const user = generateRandomId();
   const userEmail = req.body.email;
-  // "Database" building and cookie storing code
-  users[user] = {
-    id: user,
-    email: userEmail,
-    password: req.body.password,
-  };
 
   // Form validation logic
   if (!userEmail || !req.body.password) {
@@ -78,6 +71,12 @@ app.post("/register", (req, res) => {
         `<h1>This email "${userEmail}" already exist. Try to Login on it or choose another email.</h1>`
       );
   }
+  // "Database" building and cookie storing code
+  users[user] = {
+    id: user,
+    email: userEmail,
+    password: req.body.password,
+  };
 
   // output of register post route
   res.cookie("user_id", user);
@@ -91,20 +90,39 @@ app.get("/register", (req, res) => {
 });
 //// end of registration route ^//////
 
-// Login route
+// Login routes ////////////////////////////////////////////
 app.post("/login", (req, res) => {
-  const user = req.body.user_id;
-  res.cookie("user_id", user);
-  res.redirect("/urls");
+  const { email, password } = req.body;
+  // Login validation logic
+  if (users === {}) {
+    return res.redirect("/urls_login");
+  }
+  for (const user in users) {
+    if (email === users[user].email) {
+      if (password === users[user].password) {
+        res.cookie("user_id", user);
+        return res.redirect("/urls");
+      }
+    }
+  }
+  return res
+    .status(403)
+    .send("Information you've provided is incorrect. Try again.");
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = { user_id: req.cookies["user_id"] };
+  res.render("urls_login", templateVars);
+});
+//End of login routes ///////////////////////////////////////
+
 // Logout route
-app.post("/logout", (req, res) => {
+app.get("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
-// Main/Index page //////////////////////////
+// Main/Index page /////////////////////////////////////////
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   templateVars.user_id = req.cookies["user_id"];
@@ -114,8 +132,8 @@ app.get("/urls", (req, res) => {
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
-
 /////////////////////////////////////////////////////
+
 // Create New URL page //////////////////////////////
 app.get("/urls/new", (req, res) => {
   const templateVars = { user_id: req.cookies["user_id"] };

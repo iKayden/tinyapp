@@ -1,7 +1,9 @@
 <header>
   <!-- prettier-ignore -->
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
-    <a class="navbar-brand" href="/urls">TinyApp</a>
+    <span class="border-bottom border-left border-white">
+    <a class="navbar-brand  ml-3" href="/urls">TinyApp</a>
+  </span>
     <button
       class="navbar-toggler"
       type="button"
@@ -21,20 +23,19 @@
     </div>
 
     <% if(!user_id) { %>
-    <form action="/login" class="form-inline" method="POST">
-      <div class="col-auto">
-        <input type="text" class="form-control" name="user_id" placeholder="Enter your username"/>
-      </div>
-      <div class="col-auto">
-        <button type="submit" class="btn btn-outline-dark">Login</button>
-      </div>
+      <form action="/register" class="form-inline" method="GET">
+        <button type="submit" class="btn btn-outline-warning mr-5">Register</button>
+      </form>
+    <form action="/login" class="form-inline" method="GET">
+      <button type="submit" class="btn btn-outline-primary mr-3">Log In</button>
     </form>
     <% } else if (user_id) { %>
-    <form action="/logout" class="form-inline" method="POST">
-      <div class="col-auto">
+    <form action="/logout" class="form-inline" method="GET">
+      <!-- Shows undefined. Need to comeback to it later and try to fix it -->
+      <!-- <div class="col-auto">
         <span>Logged as:</span>
         <label for="logout" class="border border-light rounded d-inline p-2 bg-success text-white"><%= user_id %></label>
-      </div>
+      </div> -->
       <div class="col-auto">
         <button type="submit" class="btn btn-dark">Logout</button>
       </div>
