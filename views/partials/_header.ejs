@@ -19,6 +19,22 @@
       </div>
     </div>
 
+    <% if(username) { %>
+    <form action="/logout" class="form-inline" method="POST">
+      <div class="col-auto">
+        <span>Logged as:</span>
+        <label
+          for="logout"
+          class="border border-dark rounded-circle d-inline p-2 bg-primary text-white"
+        >
+          <%= username %>
+        </label>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-dark">Logout</button>
+      </div>
+    </form>
+    <% } else { %>
     <form action="/login" class="form-inline" method="POST">
       <div class="col-auto">
         <input
@@ -29,8 +45,9 @@
         />
       </div>
       <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-outline-dark">Login</button>
       </div>
     </form>
+    <% } %>
   </nav>
 </header>

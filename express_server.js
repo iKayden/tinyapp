@@ -37,6 +37,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+// Logout route
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -48,11 +54,13 @@ app.get("/urls.json", (req, res) => {
 // Main/Index page
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
+  templateVars.username = req.cookies["username"];
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 // new URL creation route
@@ -67,6 +75,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"],
   };
   res.render("urls_show", templateVars);
 });
