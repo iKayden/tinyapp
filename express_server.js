@@ -22,13 +22,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(cookieParser());
 
-//our mock-data-base
+//our mock-data-bases
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
 
+const users = {};
+
 // Routes for the server
+
+// Register routes
+
+app.post("/register", (req, res) => {
+  const user = generateRandomString();
+  users[user] = {
+    id: user,
+    email: req.body.email,
+    password: req.body.password,
+  };
+  res.redirect("/urls");
+});
+
+app.get("/register", (req, res) => {
+  res.render("urls_register");
+});
 
 // Login route
 app.post("/login", (req, res) => {
