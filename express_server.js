@@ -4,7 +4,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const PORT = 8080 || 3000; // default port 8080
 
-// function for making random strings. You can choose the length of it as a param (len)
+// functions for routes
 function generateRandomString() {
   const randChar =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -15,7 +15,18 @@ function generateRandomString() {
   }
   return output;
 }
+const getUserByEmail = (email) => {
+  for (const id in users) {
+    if (users[id].email === email) {
+      return users[id];
+    }
+  }
 
+  return null;
+};
+function generateRandomId() {
+  return Math.random().toString(36).substring(2, 4);
+}
 // middleware and settings for the Express server
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -28,56 +39,86 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const users = {};
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 // Routes for the server
 
-// Register routes
-
+// Register routes////////////////////
 app.post("/register", (req, res) => {
-  const user = generateRandomString();
+  const user = generateRandomId();
+  const userEmail = req.body.email;
+  // "Database" building and cookie storing code
   users[user] = {
     id: user,
-    email: req.body.email,
+    email: userEmail,
     password: req.body.password,
   };
+
+  // Form validation logic
+  if (!userEmail || !req.body.password) {
+    return res
+      .status(400)
+      .send(`<h1>Provide a valid email and/or password, please.</h1>`);
+  }
+  if (getUserByEmail(userEmail)) {
+    return res
+      .status(400)
+      .send(
+        `<h1>This email "${userEmail}" already exist. Try to Login on it or choose another email.</h1>`
+      );
+  }
+
+  // output of register post route
+  res.cookie("user_id", user);
+  console.log(users);
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
-  res.render("urls_register");
+  const templateVars = { user_id: req.cookies["user_id"] };
+  res.render("urls_register", templateVars);
 });
+//// end of registration route ^//////
 
 // Login route
 app.post("/login", (req, res) => {
-  const userName = req.body.username;
-  res.cookie("username", userName);
+  const user = req.body.user_id;
+  res.cookie("user_id", user);
   res.redirect("/urls");
 });
 
 // Logout route
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
+});
+
+// Main/Index page //////////////////////////
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  templateVars.user_id = req.cookies["user_id"];
+  res.render("urls_index", templateVars);
 });
 
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-// Main/Index page
-app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
-  templateVars.username = req.cookies["username"];
-  res.render("urls_index", templateVars);
-});
-
+/////////////////////////////////////////////////////
+// Create New URL page //////////////////////////////
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user_id: req.cookies["user_id"] };
   res.render("urls_new", templateVars);
 });
 
@@ -89,11 +130,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+//////////////////////////////////////////////
+// id Handlers////////////////////////////////
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"],
+    user_id: req.cookies["user_id"],
   };
   res.render("urls_show", templateVars);
 });

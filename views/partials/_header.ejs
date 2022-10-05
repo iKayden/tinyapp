@@ -16,24 +16,24 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a> 
       </div>
     </div>
 
-    <% if(!username) { %>
+    <% if(!user_id) { %>
     <form action="/login" class="form-inline" method="POST">
       <div class="col-auto">
-        <input type="text" class="form-control" name="username" placeholder="Enter your username"/>
+        <input type="text" class="form-control" name="user_id" placeholder="Enter your username"/>
       </div>
       <div class="col-auto">
         <button type="submit" class="btn btn-outline-dark">Login</button>
       </div>
     </form>
-    <% } else { %>
+    <% } else if (user_id) { %>
     <form action="/logout" class="form-inline" method="POST">
       <div class="col-auto">
         <span>Logged as:</span>
-        <label for="logout" class="border border-light rounded d-inline p-2 bg-success text-white"><%= username %></label>
+        <label for="logout" class="border border-light rounded d-inline p-2 bg-success text-white"><%= user_id %></label>
       </div>
       <div class="col-auto">
         <button type="submit" class="btn btn-dark">Logout</button>
