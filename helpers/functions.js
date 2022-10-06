@@ -21,4 +21,19 @@ function generateRandomId() {
   return Math.random().toString(36).substring(2, 4);
 }
 
-module.exports = { generateRandomId, generateRandomString, getUserByEmail };
+const urlOwnership = function (userID, database) {
+  let userURLs = {};
+  for (const url in database) {
+    if (userID === database[url].user_id) {
+      userURLs[url] = database[url];
+    }
+    return userURLs;
+  }
+};
+
+module.exports = {
+  generateRandomId,
+  generateRandomString,
+  getUserByEmail,
+  urlOwnership,
+};
