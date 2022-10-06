@@ -8,7 +8,7 @@ const PORT = 8080 || 3000; // default port 8080
 const {
   generateRandomId,
   generateRandomString,
-  urlOwnership,
+  urlsForUser,
   getUserByEmail,
 } = require("./helpers/functions");
 
@@ -111,8 +111,7 @@ app.get("/logout", (req, res) => {
 // Main/Index page /////////////////////////////////////////
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, user_id: req.cookies["user_id"] };
-  templateVars.urls = urlOwnership(templateVars.user_id, urlDatabase);
-  console.log(templateVars);
+  templateVars.urls = urlsForUser(templateVars.user_id, urlDatabase);
   res.render("urls_index", templateVars);
 });
 
@@ -155,16 +154,18 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const storedUserID = req.cookies["user_id"];
-  const user = users[storedUserID].id;
+  const userCheckID = req.cookies["user_id"];
+  const currentUser = users[userCheckID].id;
   const shortURL = req.params.shortURL;
-  const accessRights = urlDatabase[id].user_id;
-  if (storedUserID && user) {
-    if (user === accessRights) {
+  const accessRights = urlDatabase[shortURL].user_id;
+  console.log("ACCESS RIGHTS _______________:", accessRights);
+  if (userCheckID && currentUser) {
+    if (currentUser === accessRights) {
       delete urlDatabase[shortURL];
       res.redirect("/urls");
     }
   }
+  res.redirect("/urls");
 });
 
 app.get("/urls/:id", (req, res) => {

@@ -22,9 +22,7 @@ function generateRandomId() {
   return Math.random().toString(36).substring(2, 6);
 }
 
-const urlOwnership = function (userID, database) {
-  console.log("userID", userID);
-  console.log("DATABASE ----->", database);
+const urlsForUser = function (userID, database) {
   let userURLs = {};
   for (const url in database) {
     if (userID === database[url].user_id) {
@@ -38,5 +36,5 @@ module.exports = {
   generateRandomId,
   generateRandomString,
   getUserByEmail,
-  urlOwnership,
+  urlsForUser,
 };
