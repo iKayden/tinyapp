@@ -5,28 +5,12 @@ const cookieParser = require("cookie-parser");
 const PORT = 8080 || 3000; // default port 8080
 
 // functions for routes
-function generateRandomString() {
-  const randChar =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let output = "";
-  const urlLength = randChar.length;
-  for (let i = 0; i < 6; i++) {
-    output += randChar.charAt(Math.floor(Math.random() * urlLength));
-  }
-  return output;
-}
-const getUserByEmail = (email) => {
-  for (const id in users) {
-    if (users[id].email === email) {
-      return users[id];
-    }
-  }
+const {
+  generateRandomId,
+  generateRandomString,
+  getUserByEmail,
+} = require("./helpers/functions");
 
-  return null;
-};
-function generateRandomId() {
-  return Math.random().toString(36).substring(2, 4);
-}
 // middleware and settings for the Express server
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -35,21 +19,10 @@ app.use(cookieParser());
 
 //our mock-data-bases
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  "b2xVn2": { "longURL": "http://www.lighthouselabs.ca", "userID": "" },
+  "9sm5xK": { "longURL": "http://www.google.com", "userID": "" },
 };
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
+const users = {};
 
 // Routes for the server
 
@@ -98,7 +71,7 @@ app.post("/login", (req, res) => {
     return res.redirect("/urls_login");
   }
   for (const user in users) {
-    if (email === users[user].email) {
+    if (getUserByEmail(email)) {
       if (password === users[user].password) {
         res.cookie("user_id", user);
         return res.redirect("/urls");
@@ -137,6 +110,9 @@ app.get("/", (req, res) => {
 // Create New URL page //////////////////////////////
 app.get("/urls/new", (req, res) => {
   const templateVars = { user_id: req.cookies["user_id"] };
+  if (!templateVars.user_id) {
+    return res.redirect("/login");
+  }
   res.render("urls_new", templateVars);
 });
 

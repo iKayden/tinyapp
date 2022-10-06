@@ -5,9 +5,10 @@
     <%- include("partials/_header"); %>
     <div class="card text-center">
       <div class="card-header">
+        <p class="text-left text-large">Create your profile</p>
         <form action="/register" method="POST" class="form-inline">
           <div class="form-row">
-            <label for="email" style="width: 75px; margin: 0.5em">@Email</label>
+            <label for="email" style="width: 75px; margin: 0.5em">Email =></label>
             <input
               type="email"
               name="email"
@@ -17,8 +18,8 @@
           </div>
 
           <div class="form-row">
-            <label for="password" style="width: 75px; margin: 0.5em"
-              >*Password</label
+            <label for="password" style="width: 100px; margin: 0.5em"
+              >*Password =></label
             >
             <input
               type="password"
