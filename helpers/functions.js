@@ -8,27 +8,30 @@ function generateRandomString() {
   }
   return output;
 }
-const getUserByEmail = (email) => {
-  for (const id in users) {
-    if (users[id].email === email) {
-      return users[id];
+
+const getUserByEmail = (email, database) => {
+  for (const id in database) {
+    if (database[id].email === email) {
+      return id;
     }
   }
-
   return null;
 };
+
 function generateRandomId() {
-  return Math.random().toString(36).substring(2, 4);
+  return Math.random().toString(36).substring(2, 6);
 }
 
 const urlOwnership = function (userID, database) {
+  console.log("userID", userID);
+  console.log("DATABASE ----->", database);
   let userURLs = {};
   for (const url in database) {
     if (userID === database[url].user_id) {
       userURLs[url] = database[url];
     }
-    return userURLs;
   }
+  return userURLs;
 };
 
 module.exports = {

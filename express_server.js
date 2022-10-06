@@ -4,13 +4,13 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const PORT = 8080 || 3000; // default port 8080
 
-// functions for routes
+// Helper functions for routes
 const {
   generateRandomId,
   generateRandomString,
   urlOwnership,
+  getUserByEmail,
 } = require("./helpers/functions");
-// getUserByEmail,
 
 // middleware and settings for the Express server
 app.set("view engine", "ejs");
@@ -64,6 +64,9 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  if (req.cookies["user_id"]) {
+    return res.redirect("/urls");
+  }
   const templateVars = { user_id: req.cookies["user_id"] };
   res.render("urls_register", templateVars);
 });
@@ -90,7 +93,11 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  if (req.cookies["user_id"]) {
+    return res.redirect("/urls");
+  }
   const templateVars = { user_id: req.cookies["user_id"] };
+
   res.render("urls_login", templateVars);
 });
 //End of login routes ///////////////////////////////////////
@@ -105,6 +112,7 @@ app.get("/logout", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, user_id: req.cookies["user_id"] };
   templateVars.urls = urlOwnership(templateVars.user_id, urlDatabase);
+  console.log(templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -126,6 +134,7 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[id] = { longURL, user_id: req.cookies["user_id"] };
+  console.log("URL DATABASE ===>>>", urlDatabase);
   res.redirect(`/urls/${id}`);
 });
 //End of Creating new URL link/////////////////////////
