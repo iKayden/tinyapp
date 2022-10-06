@@ -31,11 +31,10 @@
     </form>
     <% } else if (user_id) { %>
     <form action="/logout" class="form-inline" method="GET">
-      <!-- Shows undefined. Need to comeback to it later and try to fix it -->
-      <!-- <div class="col-auto">
-        <span>Logged as:</span>
-        <label for="logout" class="border border-light rounded d-inline p-2 bg-success text-white"><%= user_id %></label>
-      </div> -->
+      <div class="col-auto">
+        <span class="text-white font-light mr-3">Logged as: </span>
+        <label for="logout" class="border border-light rounded d-inline p-2 bg-success text-white font-weight-bold"><%= user_id.email %></label>
+      </div>
       <div class="col-auto">
         <button type="submit" class="btn btn-dark">Logout</button>
       </div>

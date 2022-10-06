@@ -10,6 +10,9 @@ function generateRandomString() {
 }
 
 const getUserByEmail = (email, database) => {
+  if (!email) {
+    return null;
+  }
   for (const id in database) {
     if (database[id].email === email) {
       return id;
@@ -23,10 +26,13 @@ function generateRandomId() {
 }
 
 const urlsForUser = function (userID, database) {
-  let userURLs = {};
+  if (!userID || !database) {
+    return null;
+  }
+  const userURLs = {};
   for (const url in database) {
-    if (userID === database[url].user_id) {
-      userURLs[url] = database[url];
+    if (userID === database[url].userID) {
+      userURLs[url] = { longURL: database[url].longURL };
     }
   }
   return userURLs;
