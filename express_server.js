@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+const bcrypt = require("bcryptjs");
 const cookieParser = require("cookie-parser");
 const PORT = 8080 || 3000; // default port 8080
 
@@ -32,7 +33,7 @@ const users = {};
 
 // Register routes////////////////////
 app.post("/register", (req, res) => {
-  const user = generateRandomId();
+  const userID = generateRandomId();
   const userEmail = req.body.email;
 
   // Form validation logic
@@ -51,14 +52,14 @@ app.post("/register", (req, res) => {
     }
   }
   // "Database" building
-  users[user] = {
-    id: user,
+  users[userID] = {
+    id: userID,
     email: userEmail,
-    password: req.body.password,
+    password: bcrypt.hashSync(req.body.password, 10),
   };
 
   // output of register post route
-  res.cookie("user_id", user);
+  res.cookie("user_id", userID);
 
   res.redirect("/urls");
 });
@@ -76,16 +77,10 @@ app.get("/register", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   // Login validation logic
-  if (users === {}) {
-    return res.redirect("/urls_login");
-  }
-  for (const user in users) {
-    if (email === users[user].email) {
-      if (password === users[user].password) {
-        res.cookie("user_id", user);
-        return res.redirect("/urls");
-      }
-    }
+  const userID = getUserByEmail(email, users);
+  if (bcrypt.compareSync(password, users[userID].password)) {
+    res.cookie("user_id", userID);
+    return res.redirect("/urls");
   }
   return res
     .status(403)
