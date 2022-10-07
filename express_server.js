@@ -46,13 +46,15 @@ app.post("/register", (req, res) => {
   if (!userEmail || !req.body.password) {
     return res
       .status(400)
-      .send(`<h1>Provide a valid email and/or password, please.</h1>`);
+      .send(
+        `<h1>Provide a valid email and/or password, please.</h1> <form action='/login' method='GET'><button type='submit'>Log In</button></form><form action='/register' method='GET'><button type='submit'>Register</button></form></a>"`
+      );
   }
   if (getUserByEmail(userEmail, users)) {
     return res
       .status(400)
       .send(
-        `<h1>This email "${userEmail}" already exist. Try to Login on it or choose another email.</h1>`
+        `This email "${userEmail}" already exist. Try another password or choose another email. <form action='/login' method='GET'><button type='submit'>Log In</button></form><form action='/register' method='GET'><button type='submit'>Register</button></form></a>`
       );
   }
 
@@ -62,9 +64,7 @@ app.post("/register", (req, res) => {
     email: userEmail,
     password: bcrypt.hashSync(req.body.password, 10),
   };
-
   req.session.user_id = userID;
-
   res.redirect("/urls");
 });
 
@@ -82,15 +82,19 @@ app.get("/register", (req, res) => {
 // ---Login routes --------Login Post---------------------//
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  // Login validation logic
   const userID = getUserByEmail(email, users);
+  if (!userID) {
+    res
+      .status(403)
+      .send(
+        "Information you've provided is incorrect. Try again. <form action='/login' method='GET'><button type='submit'>Log In</button></form><form action='/register' method='GET'><button type='submit'>Register</button></form></a>"
+      );
+    return;
+  }
   if (bcrypt.compareSync(password, users[userID].password)) {
     req.session.user_id = userID;
     return res.redirect("/urls");
   }
-  return res
-    .status(403)
-    .send("Information you've provided is incorrect. Try again.");
 });
 
 // -------- Login Get ------------------------//
@@ -100,7 +104,6 @@ app.get("/login", (req, res) => {
   if (!user) {
     return res.render("urls_login", templateVars);
   }
-
   res.redirect("/urls");
 });
 //-----------End of login routes ---------------------------//
@@ -116,12 +119,11 @@ app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
   const urls = urlsForUser(req.session.user_id, urlDatabase);
   const templateVars = { urls, user };
-  console.log("TEMPLATE VARS", templateVars);
   if (!user) {
     return res
       .status(403)
       .send(
-        'You need to Login or Register first.<form action="/login" method="GET"><button type="submit">Log In</button></form><form action="/register" style="margin-top: 10px" method="GET"><button type="submit">Register</button></form></a>'
+        "You need to Login or Register first.<form action='/login' method='GET'><button type='submit'>Log In</button></form><form action='/register' method='GET'><button type='submit'>Register</button></form></a>"
       );
   }
 
@@ -152,44 +154,61 @@ app.post("/urls", (req, res) => {
 
 // -------ID Route Handlers---------------------//
 app.post("/urls/:id/edit", (req, res) => {
-  const userCheckID = req.session.user_id;
-  const currentUser = users[userCheckID].id;
-  const shortURL = req.params.id;
-  const accessRights = urlDatabase[shortURL].user_id;
-  if (userCheckID && currentUser) {
-    if (currentUser === accessRights) {
-      urlDatabase[shortURL].longURL = req.body.id;
-      return res.redirect("/urls");
-    }
+  const userSessionID = req.session.user_id;
+  // const currentUser = users[userSessionID].id;
+  const id = req.params.id;
+  if (!urlDatabase[id]) {
+    res.send(
+      "This short URL does not exist <form action='/urls' method='GET'><button type='submit'>Back to URLs</button></form>"
+    );
+    return;
   }
-  res.redirect("/urls");
+  const urlsForGivenUser = urlsForUser(userSessionID, urlDatabase);
+  if (!urlsForGivenUser[id]) {
+    res.send(
+      "This is not your URL <form action='/urls' method='GET'><button type='submit'>Back to URLs</button></form>"
+    );
+    return;
+  }
+  urlDatabase[id].longURL = req.body.id;
+  return res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const userSessionID = req.session.user_id;
-  const currentUser = users[userSessionID].id;
+  // const currentUser = users[userSessionID].id;
   const id = req.params.id;
-  const accessRights = urlDatabase[id].user_id;
-  if (userSessionID && currentUser) {
-    if (currentUser === accessRights) {
-      delete urlDatabase[id];
-      return res.redirect("/urls");
-    }
+  if (!urlDatabase[id]) {
+    res.send(
+      "This short URL does not exist <form action='/urls' method='GET'><button type='submit'>Back to URLs</button></form>"
+    );
+    return;
   }
-  res.redirect("/urls");
+  const urlsForGivenUser = urlsForUser(userSessionID, urlDatabase);
+  if (!urlsForGivenUser[id]) {
+    res.send(
+      "This is not your URL <form action='/urls' method='GET'><button type='submit'>Back to URLs</button></form>"
+    );
+    return;
+  }
+  delete urlDatabase[id];
+  return res.redirect("/urls");
 });
 
 app.get("/urls/:id", (req, res) => {
   const userSessionId = req.session.user_id;
   const id = req.params.id;
   if (!urlDatabase[id]) {
-    res.send("This short URL does not exist");
+    res.send(
+      "This short URL does not exist <form action='/urls' method='GET'><button type='submit'>Back to URLs</button></form>"
+    );
     return;
   }
   const urlsForGivenUser = urlsForUser(userSessionId, urlDatabase);
-  console.log("urlsForGivenUser", urlsForGivenUser);
   if (!urlsForGivenUser[id]) {
-    res.send("This is not your URL");
+    res.send(
+      "This is not your URL <form action='/urls' method='GET'><button type='submit'>Back to URLs</button></form>"
+    );
     return;
   }
   const templateVars = {
