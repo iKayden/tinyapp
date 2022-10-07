@@ -20,15 +20,15 @@ const testUsers = {
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "kayden",
+    user_id: "kayden",
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
-    userID: "kayden",
+    user_id: "kayden",
   },
   "extra": {
     longURL: "http://www.office.com",
-    userID: "dwight",
+    user_id: "dwight",
   },
 };
 

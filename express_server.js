@@ -70,9 +70,9 @@ app.post("/register", (req, res) => {
 
 // ------------- Get Register ----------------------------//
 app.get("/register", (req, res) => {
-  const user_id = users[req.session.user_id];
-  const templateVars = { user_id };
-  if (!user_id) {
+  const user = users[req.session.user_id];
+  const templateVars = { user };
+  if (!user) {
     return res.render("urls_register", templateVars);
   }
   res.redirect("/urls");
@@ -81,9 +81,7 @@ app.get("/register", (req, res) => {
 /////////////////////////////////////////////////////////////
 // ---Login routes --------Login Post---------------------//
 app.post("/login", (req, res) => {
-  console.log("REQ DAT BOOOODY", req.body);
   const { email, password } = req.body;
-  console.log("PASSWORD =====>", password);
   // Login validation logic
   const userID = getUserByEmail(email, users);
   if (bcrypt.compareSync(password, users[userID].password)) {
@@ -97,9 +95,9 @@ app.post("/login", (req, res) => {
 
 // -------- Login Get ------------------------//
 app.get("/login", (req, res) => {
-  const user_id = users[req.session.user_id];
-  const templateVars = { user_id };
-  if (!user_id) {
+  const user = users[req.session.user_id];
+  const templateVars = { user };
+  if (!user) {
     return res.render("urls_login", templateVars);
   }
 
@@ -115,12 +113,18 @@ app.get("/logout", (req, res) => {
 
 // ----@@----Main/Index page----@@-----------------//
 app.get("/urls", (req, res) => {
-  const user_id = users[req.session.user_id];
+  const user = users[req.session.user_id];
   const urls = urlsForUser(req.session.user_id, urlDatabase);
-  const templateVars = { urls, user_id };
-  // if(!user_id) {
-  //   return res.status(403).send("You need to login first")
-  // }
+  const templateVars = { urls, user };
+  console.log("TEMPLATE VARS", templateVars);
+  if (!user) {
+    return res
+      .status(403)
+      .send(
+        'You need to Login or Register first.<form action="/login" method="GET"><button type="submit">Log In</button></form><form action="/register" style="margin-top: 10px" method="GET"><button type="submit">Register</button></form></a>'
+      );
+  }
+
   res.render("urls_index", templateVars);
 });
 
@@ -131,8 +135,8 @@ app.get("/", (req, res) => {
 
 // ------------Create New URL link -------------------//
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user_id: req.session.user_id };
-  if (!templateVars.user_id) {
+  const templateVars = { user: users[req.session.user_id] };
+  if (!templateVars.user) {
     return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
@@ -142,20 +146,19 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[id] = { longURL, user_id: req.session.user_id };
-  console.log("URL DATABASE ===>>>", urlDatabase);
   res.redirect(`/urls/${id}`);
 });
 //---------End of Creating new URL link/------------------//
 
 // -------ID Route Handlers---------------------//
 app.post("/urls/:id/edit", (req, res) => {
-  const storedUserID = req.session.user_id;
-  const user = users[storedUserID].id;
-  const id = req.params.id;
-  const accessRights = urlDatabase[id].user_id;
-  if (storedUserID && user) {
-    if (user === accessRights) {
-      urlDatabase[id].longURL = req.body.id;
+  const userCheckID = req.session.user_id;
+  const currentUser = users[userCheckID].id;
+  const shortURL = req.params.id;
+  const accessRights = urlDatabase[shortURL].user_id;
+  if (userCheckID && currentUser) {
+    if (currentUser === accessRights) {
+      urlDatabase[shortURL].longURL = req.body.id;
       return res.redirect("/urls");
     }
   }
@@ -163,13 +166,13 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const userCheckID = req.session.user_id;
-  const currentUser = users[userCheckID].id;
-  const shortURL = req.params.shortURL;
-  const accessRights = urlDatabase[shortURL].userID;
-  if (userCheckID && currentUser) {
+  const userSessionID = req.session.user_id;
+  const currentUser = users[userSessionID].id;
+  const id = req.params.id;
+  const accessRights = urlDatabase[id].user_id;
+  if (userSessionID && currentUser) {
     if (currentUser === accessRights) {
-      delete urlDatabase[shortURL];
+      delete urlDatabase[id];
       return res.redirect("/urls");
     }
   }
@@ -177,12 +180,22 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const user_id = req.session.user_id;
+  const userSessionId = req.session.user_id;
   const id = req.params.id;
+  if (!urlDatabase[id]) {
+    res.send("This short URL does not exist");
+    return;
+  }
+  const urlsForGivenUser = urlsForUser(userSessionId, urlDatabase);
+  console.log("urlsForGivenUser", urlsForGivenUser);
+  if (!urlsForGivenUser[id]) {
+    res.send("This is not your URL");
+    return;
+  }
   const templateVars = {
-    user_id,
     id,
-    longURL: urlDatabase[id].longURL,
+    longURL: urlsForGivenUser[id].longURL,
+    user: users[userSessionId],
   };
   res.render("urls_show", templateVars);
 });

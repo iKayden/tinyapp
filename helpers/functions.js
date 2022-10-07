@@ -31,7 +31,7 @@ const urlsForUser = function (userID, database) {
   }
   const userURLs = {};
   for (const url in database) {
-    if (userID === database[url].userID) {
+    if (userID === database[url].user_id) {
       userURLs[url] = { longURL: database[url].longURL };
     }
   }
