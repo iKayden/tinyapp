@@ -3,11 +3,13 @@
   </head>
   <body>
     <%- include("partials/_header"); %>
+    
+      <!-- Login form -->
     <div class="card text-center">
       <div class="card-header">
         <form class="form-inline" action="/login" method="POST">
           <div class="form-row">
-            <label for="email" style="width: 75px; margin: 1em">@Email:</label>
+            <label for="email" style="width: 75px; margin: 1em">Email:</label>
             <input
               type="email"
               name="email"
@@ -17,7 +19,7 @@
           </div>
           <div class="form-row">
             <label for="password" style="width: 75px; margin: 1em"
-              >password:</label
+              >Password:</label
             >
             <input
               type="password"

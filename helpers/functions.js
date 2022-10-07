@@ -21,6 +21,7 @@ const getUserByEmail = (email, database) => {
   return null;
 };
 
+// Added one more generate random function without numbers and uppercase for ID
 function generateRandomId() {
   return Math.random().toString(36).substring(2, 6);
 }

@@ -15,11 +15,13 @@
           </tr>
         </thead>
         <tbody>
+          <!-- List of URLs if any-->
           <% for (let id in urls) { %>
           <tr>
             <td><a href="/u/<%= id %>"><%= id %></a></td>
             <td><a href="<%= urls[id].longURL %>"><%= urls[id].longURL %></a></td>
-            <td>
+            <td>       
+                <!-- Edit Button Form-->
               <form method="POST" action="/urls/<%= id %>">
                 <button type="submit" class="btn btn-outline-primary">
                   Edit
@@ -27,6 +29,7 @@
               </form>
             </td>
             <td>
+              <!-- Delete Button Form-->
               <form action="/urls/<%= id %>/delete" method="POST">
                 <button
                   class="btn btn-outline-danger"

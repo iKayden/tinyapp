@@ -35,15 +35,12 @@ const urlDatabase = {
 };
 const users = {};
 
-// @@@@@   Routes for the server   @@@@@ //
-
 // -----Register routes----Post Register--------------//
 app.post("/register", (req, res) => {
-  const userID = generateRandomId();
   const userEmail = req.body.email;
-
+  const userPassword = req.body.password;
   // ### Form validation logic
-  if (!userEmail || !req.body.password) {
+  if (!userEmail || !userPassword) {
     return res
       .status(400)
       .send(
@@ -57,12 +54,13 @@ app.post("/register", (req, res) => {
         `This email "${userEmail}" already exist. Try another password or choose another email. <form action='/login' method='GET'><button type='submit'>Log In</button></form><form action='/register' method='GET'><button type='submit'>Register</button></form></a>`
       );
   }
+  const userID = generateRandomId();
 
   // ### "Database" building
   users[userID] = {
     id: userID,
     email: userEmail,
-    password: bcrypt.hashSync(req.body.password, 10),
+    password: bcrypt.hashSync(userPassword, 10),
   };
   req.session.user_id = userID;
   res.redirect("/urls");
@@ -79,7 +77,7 @@ app.get("/register", (req, res) => {
 });
 //--------------end of registration route ------------------//
 /////////////////////////////////////////////////////////////
-// ---Login routes --------Login Post---------------------//
+// ----------------Login routes --------------------------//
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const userID = getUserByEmail(email, users);
@@ -97,7 +95,6 @@ app.post("/login", (req, res) => {
   }
 });
 
-// -------- Login Get ------------------------//
 app.get("/login", (req, res) => {
   const user = users[req.session.user_id];
   const templateVars = { user };
@@ -106,7 +103,7 @@ app.get("/login", (req, res) => {
   }
   res.redirect("/urls");
 });
-//-----------End of login routes ---------------------------//
+//-----------End of login routes --------//
 
 // ----------Logout route--------------//
 app.get("/logout", (req, res) => {
@@ -116,17 +113,13 @@ app.get("/logout", (req, res) => {
 
 // ----@@----Main/Index page----@@-----------------//
 app.get("/urls", (req, res) => {
-  const user = users[req.session.user_id];
-  const urls = urlsForUser(req.session.user_id, urlDatabase);
-  const templateVars = { urls, user };
+  const userID = req.session.user_id;
+  const user = users[userID];
   if (!user) {
-    return res
-      .status(403)
-      .send(
-        "You need to Login or Register first.<form action='/login' method='GET'><button type='submit'>Log In</button></form><form action='/register' method='GET'><button type='submit'>Register</button></form></a>"
-      );
+    return res.redirect("/login");
   }
-
+  const urls = urlsForUser(userID, urlDatabase);
+  const templateVars = { urls, user };
   res.render("urls_index", templateVars);
 });
 
@@ -134,28 +127,29 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 /////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
-
-// ------------Create New URL link -------------------//
+/////////////////////////////////////////////////////
+// ------------Create New URL link ---------------//
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: users[req.session.user_id] };
-  if (!templateVars.user) {
+  const userID = req.session.user_id;
+  if (!userID) {
     return res.redirect("/login");
   }
+  const templateVars = { user: users[userID] };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
+  const user_id = req.session.user_id;
   const longURL = req.body.longURL;
-  urlDatabase[id] = { longURL, user_id: req.session.user_id };
+  urlDatabase[id] = { longURL, user_id };
   res.redirect(`/urls/${id}`);
 });
 //---------End of Creating new URL link/------------------//
-
-// -------ID Route Handlers---------------------//
+///////////////////////////////////////////////////////////
+// -------------ID Route Handlers-----------------------//
 app.post("/urls/:id/edit", (req, res) => {
   const userSessionID = req.session.user_id;
-  // const currentUser = users[userSessionID].id;
   const id = req.params.id;
   if (!urlDatabase[id]) {
     res.send(
@@ -170,13 +164,12 @@ app.post("/urls/:id/edit", (req, res) => {
     );
     return;
   }
-  urlDatabase[id].longURL = req.body.id;
+  urlDatabase[id].longURL = req.body.longURL;
   return res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const userSessionID = req.session.user_id;
-  // const currentUser = users[userSessionID].id;
   const id = req.params.id;
   if (!urlDatabase[id]) {
     res.send(
