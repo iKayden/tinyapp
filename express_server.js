@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const morgan = require("morgan");
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
 const PORT = 8080 || 3000; // default port 8080
@@ -16,7 +15,6 @@ const {
 // middleware and settings for the Express server
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan("dev"));
 app.use(
   cookieSession({
     name: "session",
