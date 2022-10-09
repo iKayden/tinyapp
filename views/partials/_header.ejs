@@ -30,7 +30,7 @@
       <button type="submit" class="btn btn-outline-primary mr-3">Log In</button>
     </form>
     <% } else { %>
-    <form action="/logout" class="form-inline" method="GET">
+    <form action="/logout" class="form-inline" method="POST">
       <div class="col-auto">
         <span class="text-white font-light mr-3">Logged as: </span>
         <label for="logout" class="border border-light rounded d-inline p-2 bg-success text-white font-weight-bold"><%= user.email %></label>
